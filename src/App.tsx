@@ -1,21 +1,32 @@
+import "./App.css";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
-import "./App.css";
 
-// Define the interface for hover configuration
 interface HoverConfig {
   x: string;
   y: string;
 }
 
-// Styled components
 const Wrapper = styled.div`
   height: 100vh;
   width: 100vw;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+`;
+
+const Grid = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+
+const Row = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
 `;
 
 const Box = styled(motion.div)`
@@ -28,6 +39,7 @@ const Box = styled(motion.div)`
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
   position: relative;
 `;
 
@@ -35,30 +47,21 @@ const Circle = styled(motion.div)`
   background-color: white;
   width: 30px;
   height: 30px;
-  border-radius: 50px;
+  border-radius: 50%;
   position: absolute;
 `;
 
-interface BoxComponentProps {
-  hoverConfig: HoverConfig;
-  isActive: boolean;
-}
-
-const BoxComponent: React.FC<BoxComponentProps> = ({ hoverConfig, isActive }) => (
-  <Box whileHover={{ scale: 1.1, ...hoverConfig }}>
-    <AnimatePresence>
-      {isActive && (
-        <Circle
-          key="circle"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          exit={{ scale: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        />
-      )}
-    </AnimatePresence>
-  </Box>
-);
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+`;
 
 const ButtonContainer = styled(motion.div)`
   display: flex;
@@ -66,15 +69,18 @@ const ButtonContainer = styled(motion.div)`
   margin: 20px;
 `;
 
-const ButtonComponent: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+function ButtonComponent({ onClick }: { onClick: () => void }) {
   return (
     <ButtonContainer>
       <button onClick={onClick}>Switch</button>
     </ButtonContainer>
   );
-};
+}
 
-const App: React.FC = () => {
+const items = ["1", "2", "3", "4"];
+
+function App() {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const boxConfigs: HoverConfig[] = [
@@ -90,19 +96,46 @@ const App: React.FC = () => {
 
   return (
     <Wrapper>
-      <div>
-        <div className="row">
-          <BoxComponent hoverConfig={boxConfigs[0]} isActive={activeIndex === 0} />
-          <BoxComponent hoverConfig={boxConfigs[1]} isActive={activeIndex === 1} />
-        </div>
-        <div className="row">
-          <BoxComponent hoverConfig={boxConfigs[2]} isActive={activeIndex === 2} />
-          <BoxComponent hoverConfig={boxConfigs[3]} isActive={activeIndex === 3} />
-        </div>
-        <ButtonComponent onClick={handleSwitch} />
-      </div>
+      <Grid>
+        {Array.from({ length: Math.ceil(items.length / 2) }, (_, rowIndex) => (
+          <Row key={rowIndex}>
+            {items.slice(rowIndex * 2, rowIndex * 2 + 2).map((item, index) => (
+              <Box
+                key={item}
+                layoutId={item}
+                onClick={() => setSelectedId(item)}
+                whileHover={{ scale: 1.1, ...boxConfigs[rowIndex * 2 + index] }}
+              >
+                <AnimatePresence>
+                  {activeIndex === rowIndex * 2 + index && !selectedId && (
+                    <Circle
+                      key="circle"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    />
+                  )}
+                </AnimatePresence>
+              </Box>
+            ))}
+          </Row>
+        ))}
+      </Grid>
+
+      <ButtonComponent onClick={handleSwitch} />
+
+      <AnimatePresence>
+        {selectedId && (
+          <Overlay onClick={() => setSelectedId(null)}>
+            <Box layoutId={selectedId} style={{ width: 300, height: 200 }}>
+              <motion.div style={{ position: "relative" }} />
+            </Box>
+          </Overlay>
+        )}
+      </AnimatePresence>
     </Wrapper>
   );
-};
+}
 
 export default App;
