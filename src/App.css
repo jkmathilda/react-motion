@@ -1,3 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+US+Trad:wght@100..400&display=swap');
+
 .row {
     display: flex;
+}
+
+button {
+    padding: 10px;
+    font-size: 20px;
+    font-family: "Playwrite US Trad";
+    border: none;
+    border-radius: 20px;
+}
+button:hover {
+    cursor: pointer;
+    color: rgb(255, 3, 230);
 }
