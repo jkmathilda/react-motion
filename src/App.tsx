@@ -29,10 +29,10 @@ const Row = styled.div`
   width: 100%;
 `;
 
-const Box = styled(motion.div)`
+const Box = styled(motion.div)<{ isSelected: boolean }>`
   width: 300px;
   height: 200px;
-  background-color: rgba(255, 245, 245, 0.6);
+  background-color: ${({ isSelected }) => (isSelected ? "white" : "rgba(255, 245, 245, 0.6)")};
   border-radius: 10px;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
   margin: 10px;
@@ -105,6 +105,7 @@ function App() {
                 layoutId={item}
                 onClick={() => setSelectedId(item)}
                 whileHover={{ scale: 1.1, ...boxConfigs[rowIndex * 2 + index] }}
+                isSelected={selectedId === item}
               >
                 <AnimatePresence>
                   {activeIndex === rowIndex * 2 + index && !selectedId && (
@@ -128,7 +129,7 @@ function App() {
       <AnimatePresence>
         {selectedId && (
           <Overlay onClick={() => setSelectedId(null)}>
-            <Box layoutId={selectedId} style={{ width: 300, height: 200 }}>
+            <Box layoutId={selectedId} isSelected style={{ width: 300, height: 200 }}>
               <motion.div style={{ position: "relative" }} />
             </Box>
           </Overlay>
